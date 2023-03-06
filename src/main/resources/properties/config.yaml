@@ -1,0 +1,5 @@
+httplistner:
+ host: "localhost"
+ port: "8081"
+ path: "/practies"
+ readtimeout: "30000"

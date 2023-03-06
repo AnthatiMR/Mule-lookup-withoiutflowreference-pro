@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="a5aad6ef-f742-4704-b616-b5aa1a7ce7fb" >
+		<http:listener-connection host="${httplistner.host}" port="${httplistner.port}" readTimeout="${httplistner.readtimeout}"/>
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="9f592581-ee64-441d-991d-b6b64f255b40" file="properties\config.yaml" />
+	<flow name="practiceFlow" doc:id="19719b8d-1e4a-4837-9cce-d0a09da9dac7" >
+		<http:listener doc:name="Listener" doc:id="d1a4149f-4b9a-4fdf-bbf5-180f2f17518b" config-ref="HTTP_Listener_config1" path="${httplistner.path}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="23f1adc5-fb39-4ea2-8484-1bfa89f3b0cf" message=";;;;;strting logger;;;;;;;#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="0810fb0c-b7e8-4933-baba-615898d7ea98" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var x = Mule::lookup("firstflow",{data:{number1:attributes.queryParams.num1,number2:attributes.queryParams.num2}},30000)
+var y = if(mod(x,2)== 0) Mule::lookup("secoundflow",{data:{number1:attributes.queryParams.num1,number2:attributes.queryParams.num2}},30000) else 0
+---
+{
+	additionresult: x,
+	multipleresult: y
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="293d9759-a7d5-4716-8792-b1911b6a6165" message=";;;;;;;ending logger;;;;;;;#[payload]"/>
+	</flow>
+	<flow name="firstflow" doc:id="9a22094b-56fe-4755-9128-beab73989578" >
+		<logger level="INFO" doc:name="Logger" doc:id="9909ce24-cff5-42c1-8c6f-8becdf832475" message=";;;;;addstrting logger;;;;;;;#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="8fbe4070-02c4-4457-b898-bc674cf36dc1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+message.payload.data.number1 as Number + message.payload.data.number2 as Number]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ef0d9b93-4ad9-43ed-8804-35437fd650a4" message=";;;;;;;addending logger;;;;;;;#[payload]"/>
+	</flow>
+	<flow name="secoundflow" doc:id="e6e4beab-886f-4b53-a9c9-ebbf41c64938" >
+		<logger level="INFO" doc:name="Logger" doc:id="4b0f4e3d-dec6-4a70-9e0e-5567cd893bfb" message=";;;;;mulstrting logger;;;;;;;#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="3665b583-1a94-42bd-8f7a-960632bf06e1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var result = message.payload.data.number1 as Number * message.payload.data.number2 as Number
+---
+result]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2a259097-aa63-4988-a1c6-9239748dd33b" message=";;;;;;;mulending logger;;;;;;;#[payload]"/>
+	</flow>
+</mule>

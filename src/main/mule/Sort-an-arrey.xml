@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="Sort-an-arreyFlow" doc:id="325af464-eb12-4622-b352-24577b030c79" >
+		<ee:transform doc:name="sort an array" doc:id="b11092b0-5024-493e-83a7-22c042de15f0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload orderBy $.age map{
+	name: $.name,
+	age: $.age
+} orderBy $[-1.0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="find the large&amp;min numbers,curent date" doc:id="071add91-a81e-4f54-9abd-093a8a145e83" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+// Array with numbers
+var numbers = [10, 2, 3, 1, 20]
+
+// Array with string values
+var languages = ["DataWeave", "Java", "Groovy", "Clojure"]
+
+// Array with objects representing a user
+var users = [
+    { name: "mrhaki", age: 47 },
+    { name: "alice",  age: 32 },
+    { name: "bob",    age: 61 }
+]
+
+output application/json
+---
+{
+    maxinum:max(numbers),
+    minnum:min(numbers),
+    max:max(languages),
+    min:min(languages),
+    maxlanth:maxBy(languages, (love)-> sizeOf(love)),
+    minlenth:minBy(languages, (item)->sizeOf(item)),
+    ageperson:users maxBy ((item) -> item.age),
+    youngperson:users minBy ((item) -> item.age),
+    date:now() as String {format: "y-M-d"},
+    date:now() as String {format: "hh-MM"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
